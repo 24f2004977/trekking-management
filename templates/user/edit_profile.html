@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-5">
+        <div class="card shadow border-0">
+            <div class="card-header bg-white py-3">
+                <h5 class="mb-0 text-center"><i class="bi bi-person-gear"></i> Edit Your Profile</h5>
+            </div>
+            <div class="card-body p-4">
+                <form action="/edit_profile" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">Username</label>
+                        <input type="text" class="form-control bg-light" value="{{ user.username }}" readonly>
+                        <small class="text-muted">Username cannot be changed.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" name="email" class="form-control" value="{{ user.email }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Contact Number</label>
+                        <input type="text" name="contact" class="form-control" value="{{ user.contact_number if user.contact_number else '' }}">
+                    </div>
+                    <div class="mb-4">
+                        <label class="form-label">Emergency Contact</label>
+                        <input type="text" name="emergency_contact" class="form-control" value="{{ user.emergency_contact if user.emergency_contact else '' }}">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 shadow-sm">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

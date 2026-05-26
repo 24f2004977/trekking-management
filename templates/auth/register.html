@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row"> <!-- Row se justify-content-center (Flexbox) hata diya gaya hai -->
+        
+        <!-- offset-md-3 ka use karke 6 columns wale card ko center kiya gaya hai -->
+        <div class="col-md-6 offset-md-3">
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white text-center">
+                    <h3>Create Trekker Account</h3>
+                </div>
+
+                <div class="card-body p-4">
+                    <form action="/register" method="POST">
+
+                        <div class="mb-3">
+                            <label>Username</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Email</label>
+                            <input type="email" name="email" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Mobile Number</label>
+                            <input type="text" name="contact" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Emergency Contact</label>
+                            <input type="text" name="emergency_contact" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Join the Community
+                        </button>
+
+                    </form>
+
+                    <p class="text-center mt-3">
+                        Already have an account?
+                        <a href="/login">Login here</a>
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

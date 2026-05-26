@@ -1,0 +1,188 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- My Bookings Summary -->
+{% if user_bookings %}
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 p-4 bg-light">
+            <h5 class="text-primary mb-3">
+                <i class="bi bi-journal-check"></i> My Active Bookings
+            </h5>
+
+            <div class="row">
+                {% for b in user_bookings %}
+                <div class="col-md-4 mb-2">
+                    <div class="card border-0 shadow-sm">
+                        <div class="card-body py-3">
+                            <h6 class="mb-1">{{ b.trek_ref.name }}</h6>
+                            <small class="text-muted">
+                                Booking ID: {{ b.id }} |
+                                {{ b.num_people }} Trekkers
+                            </small>
+                            <div class="mt-2">
+                                <span class="badge
+                                    {% if b.status == 'Booked' %}
+                                        bg-success
+                                    {% elif b.status == 'Completed' %}
+                                        bg-primary
+                                    {% else %}
+                                        bg-warning text-dark
+                                    {% endif %}">
+                                    {{ b.status }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Search -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card shadow-sm border-0 p-4 bg-white">
+            <h4 class="mb-3 text-primary">
+                <i class="bi bi-search"></i> Find Your Next Adventure
+            </h4>
+
+            <form method="GET" action="/user_dashboard" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="bi bi-geo-alt"></i>
+                        </span>
+                        <input type="text"
+                               name="search"
+                               class="form-control border-start-0"
+                               placeholder="Search by location or trek name..."
+                               value="{{ request.args.get('search', '') }}">
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <select name="difficulty" class="form-select">
+                        <option value="All">All Difficulty Levels</option>
+                        <option value="Easy" {% if request.args.get('difficulty') == 'Easy' %}selected{% endif %}>Easy</option>
+                        <option value="Moderate" {% if request.args.get('difficulty') == 'Moderate' %}selected{% endif %}>Moderate</option>
+                        <option value="Hard" {% if request.args.get('difficulty') == 'Hard' %}selected{% endif %}>Hard</option>
+                    </select>
+                </div>
+
+                <div class="col-md-2">
+                    <button type="submit" class="btn btn-primary w-100 shadow-sm">
+                        Filter
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Treks -->
+<div class="row">
+    {% for trek in treks %}
+    <div class="col-md-4 mb-4">
+        <div class="card h-100 shadow-sm border-0 overflow-hidden">
+
+            <div class="bg-secondary text-white text-center py-5"
+                 style="background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.5)), url('https://source.unsplash.com/400x200/?mountain,trekking'); background-size: cover;">
+
+                <span class="badge bg-warning text-dark mb-2">
+                    {{ trek.difficulty }}
+                </span>
+
+                <!-- Trek Status -->
+                <span class="badge
+                    {% if trek.status == 'Open' %}
+                        bg-success
+                    {% elif trek.status == 'In Progress' %}
+                        bg-warning text-dark
+                    {% elif trek.status == 'Completed' %}
+                        bg-primary
+                    {% else %}
+                        bg-secondary
+                    {% endif %}">
+                    {{ trek.status }}
+                </span>
+
+                <h5 class="card-title px-2 mt-2">{{ trek.name }}</h5>
+            </div>
+
+            <div class="card-body">
+                <p class="text-muted small mb-2">
+                    <i class="bi bi-geo-alt-fill text-danger"></i> {{ trek.location }}
+                </p>
+
+                <div class="d-flex justify-content-between mb-3">
+                    <span>
+                        <i class="bi bi-calendar3"></i> {{ trek.duration }} Days
+                    </span>
+                    <span class="text-primary fw-bold">
+                        ₹{{ trek.price_per_person }}/-
+                    </span>
+                </div>
+
+                <hr>
+
+                <form action="/book_trek/{{ trek.id }}" method="POST">
+                    <div class="d-flex align-items-center mb-3">
+                        <label class="me-2 small fw-bold">Trekkers:</label>
+                        <input type="number"
+                               name="num_people"
+                               value="1"
+                               min="1"
+                               max="{{ trek.available_slots }}"
+                               class="form-control form-control-sm w-25"
+                               required>
+
+                        <small class="ms-auto text-muted">
+                            {{ trek.available_slots }} slots left
+                        </small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="small fw-bold mb-1">Select Booking Type:</label>
+                        <select name="target_booking_id" class="form-select form-select-sm border-primary">
+                            <option value="new">-- Create New Booking ID --</option>
+                            {% for b in user_bookings %}
+                                {% if b.trek_id == trek.id %}
+                                    <option value="{{ b.id }}">
+                                        Add to Existing (ID: {{ b.id }})
+                                    </option>
+                                {% endif %}
+                            {% endfor %}
+                        </select>
+                        <div class="form-text small" style="font-size: 0.75rem;">Choose "New" for separate ID or select existing to add people.</div>
+                    </div>
+
+                    {% if trek.available_slots > 0 and trek.status == 'Open' %}
+                        <button type="submit" class="btn btn-success w-100 rounded-pill shadow-sm">
+                            Confirm Booking
+                        </button>
+                    {% else %}
+                        <button class="btn btn-secondary w-100 rounded-pill" disabled>
+                            Not Available
+                        </button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <div class="col-12 text-center py-5">
+        <i class="bi bi-emoji-frown h1 text-muted"></i>
+        <p class="mt-2 text-muted">
+            No treks found matching your search.
+        </p>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

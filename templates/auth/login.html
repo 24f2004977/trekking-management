@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row"> <!-- Flex centering (justify-content-center) hata diya gaya hai -->
+        
+        <!-- offset-md-4 ka use karke card ko manually center kiya gaya hai -->
+        <div class="col-md-4 offset-md-4">
+
+            <div class="card shadow">
+                <div class="card-body p-4">
+
+                    <div class="text-center mb-4">
+                        <i class="bi bi-person-circle h1 text-primary"></i>
+                        <h3>Login</h3>
+                    </div>
+
+                    <form action="/login" method="POST">
+
+                        <div class="mb-3">
+                            <label>Username</label>
+                            <input type="text" name="username" class="form-control" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label>Password</label>
+                            <input type="password" name="password" class="form-control" required>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            Sign In
+                        </button>
+
+                    </form>
+
+                    <hr>
+
+                    <p class="text-center">
+                        New Trekker?
+                        <a href="/register">Create Account</a>
+                    </p>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

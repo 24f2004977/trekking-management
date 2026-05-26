@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Section 1: Page Header -->
+<div class="row align-items-center mb-4">
+    <div class="col-md-6">
+        <h3 class="fw-bold text-dark mb-0"><i class="bi bi-bar-chart-line text-primary"></i> Reports & Analytics</h3>
+        <p class="text-muted small mb-0">Detailed insights into revenue, trek performance, and bookings.</p>
+    </div>
+    <div class="col-md-6 text-md-end mt-3 mt-md-0">
+        <button onclick="window.print()" class="btn btn-outline-dark btn-sm px-3 shadow-sm me-2">
+            <i class="bi bi-printer"></i> Print Report
+        </button>
+        <a href="/admin_dashboard" class="text-decoration-none text-muted small">
+            <i class="bi bi-arrow-left"></i> Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<!-- Section 2: Financial Summary Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-white h-100 border-start border-primary border-4">
+            <div class="card-body">
+                <small class="text-uppercase fw-bold text-muted small">Total Revenue Collected</small>
+                <h2 class="fw-bold text-dark mt-1">₹{{ "{:,.2f}".format(total_revenue) }}</h2>
+                <p class="text-success small mb-0"><i class="bi bi-graph-up"></i> From confirmed bookings</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-white h-100 border-start border-warning border-4">
+            <div class="card-body">
+                <small class="text-uppercase fw-bold text-muted small">Average Booking Value</small>
+                {% set confirmed_count = bookings|selectattr('status', 'equalto', 'Booked')|list|length %}
+                {% set avg = (total_revenue / confirmed_count) if confirmed_count > 0 else 0 %}
+                <h2 class="fw-bold text-dark mt-1">₹{{ "{:,.2f}".format(avg) }}</h2>
+                <p class="text-muted small mb-0">Per transaction average</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm bg-white h-100 border-start border-danger border-4">
+            <div class="card-body">
+                <small class="text-uppercase fw-bold text-muted small">Potential Loss (Cancellations)</small>
+                <h2 class="fw-bold text-danger mt-1">₹{{ "{:,.2f}".format(cancelled_revenue or 0) }}</h2>
+                <p class="text-muted small mb-0">From {{ cancelled_count or 0 }} cancelled seats</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-4">
+    <!-- Section 3: Popular Treks (Performance) -->
+    <div class="col-lg-7">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-star text-warning"></i> Top Performing Treks</h6>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light small">
+                        <tr>
+                            <th class="ps-3">Trek Route</th>
+                            <th>Bookings</th>
+                            <th>Revenue Generated</th>
+                            <th>Fill Rate</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for trek in treks|sort(attribute='total_slots', reverse=True) %}
+                        {% set booked_slots = trek.total_slots - trek.available_slots %}
+                        <tr>
+                            <td class="ps-3">
+                                <div class="fw-bold small">{{ trek.name }}</div>
+                                <div class="text-muted" style="font-size: 10px;">{{ trek.location }}</div>
+                            </td>
+                            <td><span class="badge bg-light text-dark border">{{ booked_slots }}</span></td>
+                            <td class="fw-bold text-success small">₹{{ "{:,.0f}".format(booked_slots * trek.price_per_person) }}</td>
+                            <td style="width: 100px;">
+                                {% set fill_p = (booked_slots / trek.total_slots * 100)|int %}
+                                <div class="progress" style="height: 5px;">
+                                    <div class="progress-bar bg-primary" style="width: {{ fill_p }}%"></div>
+                                </div>
+                                <small class="text-muted" style="font-size: 9px;">{{ fill_p }}% Full</small>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section 4: Staff Workload -->
+    <div class="col-lg-5">
+        <div class="card border-0 shadow-sm h-100">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold"><i class="bi bi-person-badge text-primary"></i> Staff Workload</h6>
+            </div>
+            <div class="card-body">
+                {% for s in staff_members %}
+                {% set trek_count = treks|selectattr('staff_id', 'equalto', s.id)|list|length %}
+                <div class="mb-3">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="small fw-bold">{{ s.staff_profile.name if s.staff_profile else s.username }}</span>
+                        <span class="small text-muted">{{ trek_count }} Treks assigned</span>
+                    </div>
+                    <div class="progress" style="height: 8px;">
+                        <!-- Assuming max 10 treks per staff for scaling -->
+                        {% set workload = ((trek_count / 10 * 100)|int) if trek_count <= 10 else 100 %}
+                        <div class="progress-bar bg-info" style="width: {{ workload }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+                <div class="alert alert-light border small mt-4">
+                    <i class="bi bi-info-circle"></i> Workload is calculated based on currently assigned active treks.
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Section 5: Recent Booking Status Breakdown -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h6 class="mb-0 fw-bold"><i class="bi bi-pie-chart text-info"></i> Booking Status Breakdown</h6>
+    </div>
+    <div class="card-body">
+        <div class="row text-center g-3">
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    <h3 class="fw-bold text-primary">{{ t_bookings }}</h3>
+                    <small class="text-muted text-uppercase">Total Requests</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    {% set confirmed = bookings|selectattr('status', 'equalto', 'Booked')|list|length %}
+                    <h3 class="fw-bold text-success">{{ confirmed }}</h3>
+                    <small class="text-muted text-uppercase">Confirmed</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    {% set cancelled = bookings|selectattr('status', 'equalto', 'Cancelled')|list|length %}
+                    <h3 class="fw-bold text-danger">{{ cancelled }}</h3>
+                    <small class="text-muted text-uppercase">Cancelled</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="p-3 border rounded">
+                    {% set pending = bookings|selectattr('status', 'equalto', 'Pending Payment')|list|length %}
+                    <h3 class="fw-bold text-warning">{{ pending }}</h3>
+                    <small class="text-muted text-uppercase">Pending Payment</small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<div class="row g-4 mb-4">
+
+    <!-- Popular Treks Chart -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-bar-chart text-primary"></i> Trek Booking Analytics
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="trekChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Booking Status Chart -->
+    <div class="col-md-6">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white py-3 border-bottom">
+                <h6 class="mb-0 fw-bold">
+                    <i class="bi bi-pie-chart text-success"></i> Booking Status Analytics
+                </h6>
+            </div>
+            <div class="card-body">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+const trekCtx = document.getElementById('trekChart');
+
+new Chart(trekCtx, {
+    type: 'bar',
+    data: {
+        labels: {{ trek_names|tojson }},
+        datasets: [{
+            label: 'Confirmed Bookings',
+            data: {{ trek_booking_counts|tojson }},
+            borderWidth: 1
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+
+const statusCtx = document.getElementById('statusChart');
+
+new Chart(statusCtx, {
+    type: 'pie',
+    data: {
+        labels: ['Booked', 'Pending', 'Cancelled'],
+        datasets: [{
+            data: [
+                {{ booking_status_counts['Booked'] }},
+                {{ booking_status_counts['Pending'] }},
+                {{ booking_status_counts['Cancelled'] }}
+            ]
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: true
+    }
+});
+</script>
+
+{% endblock %}

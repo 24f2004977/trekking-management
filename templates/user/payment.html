@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+
+            <!-- Payment Card -->
+            <div class="card shadow-lg border-0 rounded-4 overflow-hidden">
+
+                <!-- Header -->
+                <div class="bg-dark text-white text-center py-4">
+                    <h3 class="fw-bold mb-1">
+                        <i class="bi bi-shield-lock-fill text-primary"></i> Secure Payment
+                    </h3>
+                    <p class="mb-0 opacity-75 small">
+                        Complete your booking safely
+                    </p>
+                </div>
+
+                <div class="card-body p-5">
+
+                    <!-- Trek Info -->
+                    <div class="text-center mb-4">
+                        <h4 class="fw-bold text-dark">{{ trek.name }}</h4>
+                        <p class="text-muted mb-0">
+                            <i class="bi bi-geo-alt"></i> {{ trek.location }}
+                        </p>
+                    </div>
+
+                    <!-- Booking Summary -->
+                    <div class="card bg-light border-0 rounded-4 mb-4">
+                        <div class="card-body p-4">
+
+                            <h6 class="text-uppercase text-muted small fw-bold mb-3">
+                                Booking Summary
+                            </h6>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Booking ID</span>
+                                <strong>#BK-{{ booking.id }}</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Number of Trekkers</span>
+                                <strong>{{ num_p }}</strong>
+                            </div>
+
+                            {% if extra_people > 0 %}
+                            <div class="d-flex justify-content-between mb-2">
+                                <span>Extra People Added</span>
+                                <strong>{{ extra_people }}</strong>
+                            </div>
+                            {% endif %}
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="fw-semibold">Total Amount</span>
+                                <h3 class="text-success fw-bold mb-0">₹{{ amount }}</h3>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Payment Form -->
+                    <form action="{{ url_for('process_payment', booking_id=booking.id) }}" method="POST">
+
+                        <input type="hidden" name="num_p" value="{{ num_p }}">
+                        <input type="hidden" name="amount" value="{{ amount }}">
+                        <input type="hidden" name="is_new" value="{{ is_new }}">
+
+                        <!-- Card Number -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Card Number</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-white">
+                                    <i class="bi bi-credit-card-2-front"></i>
+                                </span>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="1234 5678 9012 3456"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Name -->
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Cardholder Name</label>
+                            <input type="text"
+                                   class="form-control"
+                                   placeholder="Enter name on card"
+                                   required>
+                        </div>
+
+                        <!-- Expiry + CVV -->
+                        <div class="row">
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">Expiry Date</label>
+                                <input type="text"
+                                       class="form-control"
+                                       placeholder="MM/YY"
+                                       required>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <label class="form-label fw-bold">CVV</label>
+                                <input type="password"
+                                       class="form-control"
+                                       placeholder="***"
+                                       required>
+                            </div>
+                        </div>
+
+                        <!-- Security Note -->
+                        <div class="alert alert-info border-0 small rounded-3">
+                            <i class="bi bi-shield-check"></i>
+                            Your payment information is securely processed.
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg shadow rounded-pill">
+                                <i class="bi bi-lock-fill"></i> Pay ₹{{ amount }}
+                            </button>
+
+                            <a href="{{ url_for('user_dashboard') }}"
+                               class="btn btn-outline-secondary rounded-pill">
+                                Cancel Payment
+                            </a>
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{% endblock %}

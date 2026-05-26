@@ -1,0 +1,213 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">
+        <i class="bi bi-journal-check text-primary"></i> My Active Bookings
+    </h3>
+    <a href="/user_dashboard" class="btn btn-primary btn-sm shadow-sm">
+        <i class="bi bi-plus-circle"></i> Book New Trek
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase small">
+                <tr>
+                    <th class="ps-3">Booking ID</th>
+                    <th>Trek Details</th>
+                    <th>Booking Date</th>
+                    <th>Trekkers</th>
+                    <th>Total Paid</th>
+                    <th>Status</th>
+                    <th class="text-center">Action</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for b in bookings %}
+                {% if b.status == 'Booked' or b.status == 'Pending Payment' %}
+                <tr>
+                    <td class="ps-3 fw-bold text-muted">
+                        #BK-{{ b.id }}
+                    </td>
+
+                    <td>
+                        <strong>{{ b.trek_ref.name }}</strong><br>
+                        <small class="text-muted">
+                            <i class="bi bi-geo-alt"></i> {{ b.trek_ref.location }}
+                        </small>
+                    </td>
+
+                    <td>
+                        {{ b.booking_date.strftime('%d %b, %Y') }}
+                    </td>
+
+                    <td>
+                        <span class="badge bg-light text-dark border">
+                            {{ b.num_people }} Person(s)
+                        </span>
+                    </td>
+
+                    <td>
+                        <strong class="text-success">
+                            ₹{{ b.total_amount }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <span class="badge rounded-pill
+                            {% if b.status == 'Booked' %}
+                                bg-success
+                            {% else %}
+                                bg-warning text-dark
+                            {% endif %}">
+                            {{ b.status }}
+                        </span>
+                    </td>
+
+                    <td class="text-center">
+
+                        {% if b.status == 'Pending Payment' %}
+                        <a href="{{ url_for('payment_page',
+                            booking_id=b.id,
+                            amount=b.total_amount,
+                            num_p=b.num_people,
+                            is_new='true') }}"
+                           class="btn btn-sm btn-warning shadow-sm fw-bold">
+                            <i class="bi bi-credit-card"></i> Pay Now
+                        </a>
+
+                        {% elif b.status == 'Booked' %}
+                        <button type="button"
+                                class="btn btn-sm btn-outline-danger shadow-sm"
+                                data-bs-toggle="modal"
+                                data-bs-target="#cancelModal{{ b.id }}">
+                            <i class="bi bi-x-circle"></i> Cancel
+                        </button>
+                        {% endif %}
+
+                    </td>
+                </tr>
+                {% endif %}
+                {% else %}
+                <tr>
+                    <td colspan="7" class="text-center py-5 text-muted">
+                        <i class="bi bi-journal-x display-5 opacity-25"></i>
+                        <p class="mt-2 mb-0">No active bookings found.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Cancel Booking Modals -->
+{% for b in bookings %}
+{% if b.status == 'Booked' %}
+<div class="modal fade" id="cancelModal{{ b.id }}" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow rounded-4">
+
+            <form action="{{ url_for('cancel_booking', booking_id=b.id) }}" method="POST">
+
+                <div class="modal-header bg-dark text-white">
+                    <h5 class="modal-title">
+                        <i class="bi bi-ticket-perforated"></i> Cancel Booking
+                    </h5>
+                    <button type="button"
+                            class="btn-close btn-close-white"
+                            data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="card bg-light border-0 mb-3">
+                        <div class="card-body">
+                            <h6 class="text-muted small text-uppercase">
+                                Booking Summary
+                            </h6>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Trek:</span>
+                                <strong>{{ b.trek_ref.name }}</strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Total Paid:</span>
+                                <strong class="text-success">
+                                    ₹{{ b.total_amount }}
+                                </strong>
+                            </div>
+
+                            <div class="d-flex justify-content-between">
+                                <span>Trekkers:</span>
+                                <strong>{{ b.num_people }}</strong>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Members to cancel
+                        </label>
+                        <input type="number"
+                               name="cancel_count"
+                               min="1"
+                               max="{{ b.num_people }}"
+                               value="{{ b.num_people }}"
+                               class="form-control"
+                               required
+                               oninput="updateRefund(this, {{ b.total_amount / b.num_people }}, {{ b.id }})">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-bold">
+                            Reason
+                        </label>
+                        <textarea name="reason"
+                                  class="form-control"
+                                  rows="2"
+                                  required></textarea>
+                    </div>
+
+                    <div class="alert alert-info">
+                        Refund Amount:
+                        <strong>
+                            ₹<span id="refundDisplay{{ b.id }}">{{ b.total_amount }}</span>
+                        </strong>
+                    </div>
+
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button"
+                            class="btn btn-secondary"
+                            data-bs-dismiss="modal">
+                        Back
+                    </button>
+
+                    <button type="submit"
+                            class="btn btn-danger">
+                        Confirm Cancel
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}
+
+<script>
+function updateRefund(input, pricePerPerson, bookingId) {
+    let count = input.value;
+    let totalRefund = count * pricePerPerson;
+    document.getElementById('refundDisplay' + bookingId).innerText = totalRefund.toFixed(2);
+}
+</script>
+
+{% endblock %}

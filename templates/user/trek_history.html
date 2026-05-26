@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3 class="fw-bold">
+        <i class="bi bi-clock-history text-primary"></i> Trekking History
+    </h3>
+
+    <a href="/user_dashboard" class="btn btn-outline-primary btn-sm">
+        <i class="bi bi-plus-circle"></i> Book Again
+    </a>
+</div>
+
+<div class="card shadow-sm border-0 rounded-4">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light text-uppercase small">
+                <tr>
+                    <th class="ps-3">Booking ID</th>
+                    <th>Trek</th>
+                    <th>Date</th>
+                    <th>Trekkers</th>
+                    <th>Total Amount</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for b in bookings %}
+                {% if b.status == 'Completed' or b.status == 'Cancelled' %}
+                <tr>
+                    <td class="ps-3 fw-bold text-muted">
+                        #BK-{{ b.id }}
+                    </td>
+
+                    <td>
+                        <strong>{{ b.trek_ref.name }}</strong><br>
+                        <small class="text-muted">
+                            <i class="bi bi-geo-alt"></i> {{ b.trek_ref.location }}
+                        </small>
+                    </td>
+
+                    <td>
+                        {{ b.booking_date.strftime('%d %b, %Y') }}
+                    </td>
+
+                    <td>
+                        {{ b.num_people }} Person(s)
+                    </td>
+
+                    <td>
+                        <strong class="text-success">
+                            ₹{{ b.total_amount }}
+                        </strong>
+                    </td>
+
+                    <td>
+                        <span class="badge rounded-pill
+                            {% if b.status == 'Completed' %}
+                                bg-primary
+                            {% else %}
+                                bg-dark
+                            {% endif %}">
+                            {{ b.status }}
+                        </span>
+                    </td>
+                </tr>
+                {% endif %}
+                {% else %}
+                <tr>
+                    <td colspan="6" class="text-center py-5 text-muted">
+                        <i class="bi bi-clock-history display-5 opacity-25"></i>
+                        <p class="mt-2 mb-0">No trekking history yet.</p>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

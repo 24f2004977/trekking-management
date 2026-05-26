@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="row">
+    <!-- Center align logic consistent with dashboard style -->
+    <div class="col-md-6 offset-md-3">
+        
+        <!-- Back Button - Dashboard theme style -->
+        <div class="mb-3">
+            <a href="/admin_dashboard" class="text-decoration-none text-muted small">
+                <i class="bi bi-arrow-left"></i> Back to Dashboard
+            </a>
+        </div>
+
+        <div class="card shadow-sm border-0">
+            <!-- Header matching dashboard's dark theme -->
+            <div class="card-header bg-dark text-white py-3">
+                <h5 class="mb-0"><i class="bi bi-person-badge-fill me-2"></i> Register New Staff</h5>
+            </div>
+            
+            <div class="card-body p-4">
+                <form action="/admin/add_staff" method="POST">
+                    
+                    <!-- Account Credentials -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase text-muted">
+                            <i class="bi bi-shield-lock"></i> Account Credentials
+                        </label>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <input type="text" name="username" class="form-control" placeholder="Username" required>
+                            </div>
+                            <div class="col-md-6">
+                                <input type="password" name="password" class="form-control" placeholder="Initial Password" required>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr class="text-muted opacity-25">
+
+                    <!-- Profile Details -->
+                    <div class="mb-4">
+                        <label class="form-label fw-bold small text-uppercase text-muted">
+                            <i class="bi bi-person-lines-fill"></i> Staff Profile Details
+                        </label>
+                        
+                        <div class="mb-3">
+                            <input type="text" name="name" class="form-control" placeholder="Full Name (e.g. Rajesh Kumar)" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <div class="input-group">
+                                <span class="input-group-text bg-light"><i class="bi bi-telephone"></i></span>
+                                <input type="text" name="contact" class="form-control" placeholder="Mobile Number" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <textarea name="bio" class="form-control" rows="3" placeholder="Experience summary, specialized routes, certifications..."></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons matching Dashboard's Primary color -->
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-primary shadow-sm">
+                            <i class="bi bi-check-circle"></i> Create Staff Member
+                        </button>
+                        <a href="/admin_dashboard" class="btn btn-light border text-muted">Cancel</a>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+        
+        <!-- Help Text -->
+        <p class="text-center text-muted small mt-3">
+            <i class="bi bi-info-circle"></i> Staff will use their username to login and manage assigned treks.
+        </p>
+
+    </div>
+</div>
+
+{% endblock %}

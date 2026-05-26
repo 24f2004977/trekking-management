@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- Header -->
+<div class="row mb-4">
+    <div class="col-md-12">
+        <div class="card bg-dark text-white p-4 shadow border-0 rounded-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h2 class="mb-1 fw-bold">
+                        <i class="bi bi-person-workspace text-primary"></i> Staff Dashboard
+                    </h2>
+                    <p class="mb-0 opacity-75">
+                        Welcome back, <strong>{{ staff.name }}</strong>. Manage your assigned expeditions.
+                    </p>
+                </div>
+                <div>
+                    <span class="badge bg-primary fs-6 px-3 py-2 rounded-pill">
+                        {{ treks|length }} Assigned Treks
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Trek Cards -->
+<h4 class="mb-3 text-secondary fw-bold">My Assigned Treks</h4>
+
+<div class="row">
+    {% for trek in treks %}
+    <div class="col-md-6 mb-4">
+        <div class="card h-100 shadow-sm border-0 border-start border-primary border-5 rounded-4">
+            <div class="card-body p-4">
+
+                <!-- Trek Title + Status -->
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">{{ trek.name }}</h5>
+                        <p class="text-muted small mb-0">
+                            <i class="bi bi-geo-alt"></i> {{ trek.location }}
+                        </p>
+                    </div>
+
+                    <span class="badge rounded-pill px-3 py-2
+                        {% if trek.status == 'Open' %}
+                            bg-success
+                        {% elif trek.status == 'In Progress' %}
+                            bg-warning text-dark
+                        {% elif trek.status == 'Completed' %}
+                            bg-primary
+                        {% else %}
+                            bg-secondary
+                        {% endif %}">
+                        {{ trek.status }}
+                    </span>
+                </div>
+
+                <!-- Participant Stats -->
+                {% set booked = trek.total_slots - trek.available_slots %}
+
+                <div class="bg-light p-3 rounded-3 mb-3">
+                    <div class="d-flex justify-content-between small mb-2">
+                        <span>
+                            <i class="bi bi-people-fill text-primary"></i>
+                            Registered Trekkers
+                        </span>
+                        <span class="fw-bold">{{ booked }} / {{ trek.total_slots }}</span>
+                    </div>
+
+                    {% if trek.total_slots > 0 %}
+                        {% set filled = ((booked / trek.total_slots) * 100)|int %}
+                    {% else %}
+                        {% set filled = 0 %}
+                    {% endif %}
+
+                    <div class="progress" style="height: 8px;">
+                        <div class="progress-bar bg-primary" style="width: {{ filled }}%"></div>
+                    </div>
+
+                    <div class="mt-2 small text-muted">
+                        {{ trek.available_slots }} seats available
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <a href="/staff/participants/{{ trek.id }}"
+                       class="btn btn-outline-info btn-sm flex-grow-1 shadow-sm">
+                        <i class="bi bi-people"></i> Participants
+                    </a>
+
+                    <a href="/staff/manage_trek/{{ trek.id }}"
+                       class="btn btn-primary btn-sm flex-grow-1 shadow-sm">
+                        <i class="bi bi-gear-fill"></i> Manage Trek
+                    </a>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {% else %}
+    <!-- Empty State -->
+    <div class="col-12 text-center py-5">
+        <div class="card p-5 border-0 shadow-sm rounded-4">
+            <i class="bi bi-clipboard-x display-4 text-muted"></i>
+            <p class="mt-3 text-muted mb-0">
+                No treks have been assigned to you yet.
+            </p>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}
