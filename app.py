@@ -3,13 +3,19 @@ from models import db, User, StaffProfile, Trek, Booking
 from datetime import datetime
 from sqlalchemy import func
 from zoneinfo import ZoneInfo
+import os
 
 app = Flask(__name__)
 
 # --- Configuration ---
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///trekking_mgmt.db'
+db_url = os.environ.get("DATABASE_URL")
+
+if db_url and db_url.startswith("postgres://"):
+    db_url = db_url.replace("postgres://", "postgresql://", 1)
+
+app.config['SQLALCHEMY_DATABASE_URI'] = db_url or 'sqlite:///trekking_mgmt.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SECRET_KEY'] = 'mad1_project_secret_key'
+app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY", "mad1_project_secret_key")
 
 db.init_app(app)
 
