@@ -101,7 +101,7 @@ def api_users():
 
 @app.route('/')
 def index():
-    return redirect(url_for('login'))
+    return redirect(url_for('auth/login'))
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
